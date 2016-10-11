@@ -21,6 +21,12 @@
     var assetGroups = groupAssets(
       linkPropertiesModel);
 
+    var assetSelectionMenu = AssetSelectionMenu(assetGroups, {
+      onSelect: function(layerName) {
+        window.location.hash = layerName;
+      }
+    });
+
     eventbus.on('layer:selected', function(layer) {
       // assetSelectionMenu.select(layer);
     });
@@ -31,6 +37,7 @@
           instructionsPopup,
           new LocationSearch(backend, window.applicationModel)
       ),
+      assetSelectionMenu,
       assetGroups
     );
 

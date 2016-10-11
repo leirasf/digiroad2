@@ -3,14 +3,16 @@
     initialize: initialize
   };
 
-  function initialize(container, searchBox, assetControlGroups) {
+  function initialize(container, searchBox, assetSelectionMenu,  assetControlGroups) {
     var navigationPanel = $('<div class="navigation-panel"></div>');
 
     navigationPanel.append(searchBox.element);
+    navigationPanel.append(assetSelectionMenu.element);
 
     var assetControls = _.flatten(assetControlGroups);
 
     var assetElementDiv = $('<div></div>');
+    assetElementDiv.append(assetSelectionMenu.element);
     assetControls.forEach(function(asset) {
       assetElementDiv.append(asset.element);
     });
