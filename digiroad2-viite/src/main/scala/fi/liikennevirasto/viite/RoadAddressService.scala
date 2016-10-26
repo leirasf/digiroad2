@@ -238,6 +238,10 @@ class RoadAddressService(roadLinkService: RoadLinkService, eventbus: DigiroadEve
     }
   }
 
+  def getRoadAddressesLinkByMunicipality(municipality: Int): Seq[RoadAddressLink] = {
+    Seq()
+  }
+
 }
 
 object RoadAddressLinkBuilder {
