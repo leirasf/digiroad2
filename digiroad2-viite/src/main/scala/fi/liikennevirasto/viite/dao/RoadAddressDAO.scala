@@ -14,6 +14,7 @@ import org.joda.time.format.DateTimeFormat
 import org.slf4j.LoggerFactory
 import slick.jdbc.{GetResult, PositionedResult, StaticQuery => Q}
 import com.github.tototoshi.slick.MySQLJodaSupport._
+import fi.liikennevirasto.digiroad2.linearasset.RoadLink
 import fi.liikennevirasto.digiroad2.{GeometryUtils, Point}
 import fi.liikennevirasto.viite.RoadType
 import fi.liikennevirasto.viite.model.Anomaly
@@ -387,6 +388,19 @@ object RoadAddressDAO {
              Where id = $roadAddressId
       """.execute
     }
+  }
+
+  def changeRoadAddressGeometry(roadlink: RoadLink): Unit = {
+      val roadlinkId = roadlink.linkId
+      val first = roadlink.geometry.head
+      val last = roadlink.geometry.last
+      val (x1, y1, z1, x2, y2, z2) = (first.x, first.y, first.z, last.x, last.y, last.z)
+      val length = GeometryUtils.geometryLength(roadlink.geometry)
+             sqlu"""
+           Update road_address Set geometry= MDSYS.SDO_GEOMETRY(4002, 3067, NULL, MDSYS.SDO_ELEM_INFO_ARRAY(1,2,1), MDSYS.SDO_ORDINATE_ARRAY(
+                  $x1,$y1,$z1,0.0,$x2,$y2,$z2,$length))
+             Where lrm_position_id = (select id from lrm_position where link_id = $roadlinkId)
+      """.execute
   }
 
   def changeRoadAddressFloating(float: Boolean, roadAddressId: Long, geometry: Option[Seq[Point]] = None): Unit = {

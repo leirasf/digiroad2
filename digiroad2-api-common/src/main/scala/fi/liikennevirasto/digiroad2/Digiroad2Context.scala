@@ -4,7 +4,7 @@ import java.util.Properties
 
 import akka.actor.{Actor, ActorSystem, Props}
 import fi.liikennevirasto.digiroad2.linearasset.LinearAssetFiller.ChangeSet
-import fi.liikennevirasto.digiroad2.linearasset.{PersistedLinearAsset, SpeedLimit, UnknownSpeedLimit}
+import fi.liikennevirasto.digiroad2.linearasset.{PersistedLinearAsset, RoadLink, SpeedLimit, UnknownSpeedLimit}
 import fi.liikennevirasto.digiroad2.masstransitstop.oracle.MassTransitStopDao
 import fi.liikennevirasto.digiroad2.municipality.MunicipalityProvider
 import fi.liikennevirasto.digiroad2.oracle.OracleDatabase
@@ -88,6 +88,13 @@ class RoadAddressFloater(roadAddressService: RoadAddressService) extends Actor {
   }
 }
 
+class RoadAddressGeometryUpdater(roadAddressService: RoadAddressService) extends Actor {
+  def receive = {
+    case w: Seq[any] => roadAddressService.saveGeometryAdjustments(w.asInstanceOf[Seq[RoadLink]])
+    case _                    => println("roadAddressGeometryUpdater: Received unknown message")
+  }
+}
+
 object Digiroad2Context {
   val Digiroad2ServerOriginatedResponseHeader = "Digiroad2-Server-Originated-Response"
   lazy val properties: Properties = {
@@ -125,6 +132,9 @@ object Digiroad2Context {
 
   val roadAddressFloater = system.actorOf(Props(classOf[RoadAddressFloater], roadAddressService), name = "roadAddressFloater")
   eventbus.subscribe(roadAddressFloater, "roadAddress:floatRoadAddress")
+
+  val roadAddressGeometryUpdater = system.actorOf(Props(classOf[RoadAddressGeometryUpdater], roadAddressService), name = "roadAddressGeometryUpdater")
+  eventbus.subscribe(roadAddressGeometryUpdater, "roadAddress:updateRoadAddressGeometry")
 
   lazy val roadAddressService: RoadAddressService = {
     new RoadAddressService(roadLinkService, eventbus)

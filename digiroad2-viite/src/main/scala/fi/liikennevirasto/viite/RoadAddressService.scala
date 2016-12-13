@@ -81,7 +81,7 @@ class RoadAddressService(roadLinkService: RoadLinkService, eventbus: DigiroadEve
   }
 
   private def fetchRoadLinksWithComplementary(boundingRectangle: BoundingRectangle, roadNumberLimits: Seq[(Int, Int)], municipalities: Set[Int],
-                                      everything: Boolean = false, publicRoads: Boolean = false): (Seq[RoadLink], Set[Long]) = {
+                                              everything: Boolean = false, publicRoads: Boolean = false): (Seq[RoadLink], Set[Long]) = {
     val roadLinksF = Future(roadLinkService.getViiteRoadLinksFromVVH(boundingRectangle, roadNumberLimits, municipalities, everything, publicRoads))
     val complementaryLinksF = Future(roadLinkService.getComplementaryRoadLinksFromVVH(boundingRectangle, municipalities))
     val (roadLinks, complementaryLinks) = Await.result(roadLinksF.zip(complementaryLinksF), Duration.Inf)
@@ -118,13 +118,17 @@ class RoadAddressService(roadLinkService: RoadLinkService, eventbus: DigiroadEve
     val fetchRoadAddressesByBoundingBoxF = Future(fetchRoadAddressesByBoundingBox(boundingRectangle))
     val (complementedRoadLinks, complementaryLinkIds) = fetchRoadLinksWithComplementary(boundingRectangle, roadNumberLimits, municipalities, everything, publicRoads)
     val linkIds = complementedRoadLinks.map(_.linkId).toSet
-
     val (floatingViiteRoadLinks, addresses, floating) = Await.result(fetchRoadAddressesByBoundingBoxF, Duration.Inf)
     val missingLinkIds = linkIds -- floating.keySet
-
     val missedRL = withDynTransaction {
       RoadAddressDAO.getMissingRoadAddresses(missingLinkIds)
     }.groupBy(_.linkId)
+    val badRoadAddressGeometryLinks = linkIds -- addresses.keySet -- floating.keySet -- missedRL.keySet
+    val badRoadAddressGeometry: Seq[RoadLink] = complementedRoadLinks.filter {
+      rl =>
+      val roadlink = badRoadAddressGeometryLinks.exists(r => r == rl.linkId)
+        roadlink
+    }
 
     val viiteRoadLinks = complementedRoadLinks.map { rl =>
       val ra = addresses.getOrElse(rl.linkId, Seq())
@@ -137,6 +141,7 @@ class RoadAddressService(roadLinkService: RoadLinkService, eventbus: DigiroadEve
     eventbus.publish("roadAddress:persistMissingRoadAddress", changeSet.missingRoadAddresses)
     eventbus.publish("roadAddress:persistAdjustments", changeSet.adjustedMValues)
     eventbus.publish("roadAddress:floatRoadAddress", changeSet.toFloatingAddressIds)
+    eventbus.publish("roadAddress:updateRoadAddressGeometry", badRoadAddressGeometry)
 
     val returningTopology = filledTopology.filter(link => !complementaryLinkIds.contains(link.linkId) ||
       complementaryLinkFilter(roadNumberLimits, municipalities, everything, publicRoads)(link))
@@ -179,9 +184,9 @@ class RoadAddressService(roadLinkService: RoadLinkService, eventbus: DigiroadEve
   }
 
   def buildFloatingRoadAddressLink(rl: VVHHistoryRoadLink, roadAddrSeq: Seq[RoadAddress]): Seq[RoadAddressLink] = {
-   roadAddrSeq.map( ra => {
-     RoadAddressLinkBuilder.build(rl, ra)
-   })
+    roadAddrSeq.map( ra => {
+      RoadAddressLinkBuilder.build(rl, ra)
+    })
   }
 
   private def combineGeom(roadAddresses: Seq[RoadAddress]) = {
@@ -341,6 +346,12 @@ class RoadAddressService(roadLinkService: RoadLinkService, eventbus: DigiroadEve
   def saveAdjustments(addresses: Seq[LRMValueAdjustment]): Unit = {
     withDynTransaction {
       addresses.foreach(RoadAddressDAO.updateLRM)
+    }
+  }
+
+  def saveGeometryAdjustments(addresses: Seq[RoadLink]): Unit = {
+    withDynTransaction {
+      addresses.foreach(RoadAddressDAO.changeRoadAddressGeometry)
     }
   }
 }
