@@ -718,9 +718,9 @@ object DataFixture {
       case Some ("verify_roadLink_administrative_class_changed") =>
         verifyRoadLinkAdministrativeClassChanged()
       case Some("check_TR_bus_stops_without_OTH_LiviId") =>
-        updateTierekisteriBusStopsWithoutOTHLiviId(true)
+        updateTierekisteriBusStopsWithoutOTHLiviId(true, 20)
       case Some("set_TR_bus_stops_without_OTH_LiviId") =>
-        updateTierekisteriBusStopsWithoutOTHLiviId(false)
+        updateTierekisteriBusStopsWithoutOTHLiviId(false, 20)
       case Some("check_bus_stop_matching_between_OTH_TR") =>
         val dryRun = args.length == 2 && args(1) == "dry-run"
         checkBusStopMatchingBetweenOTHandTR(dryRun)
