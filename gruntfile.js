@@ -257,8 +257,8 @@ module.exports = function(grunt) {
     },
     exec: {
       build_openlayers: {
-        cmd: './build.py',
-        cwd: './bower_components/openlayers/build/'
+        cmd: 'node tasks/build.js ../../viite-UI/src/resources/digiroad2/ol3/ol-custom.js build/ol3.js',
+        cwd: './bower_components/openlayers/'
       }
     }
   });

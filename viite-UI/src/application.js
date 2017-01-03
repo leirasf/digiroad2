@@ -1,3 +1,4 @@
+var mapObject;
 (function(application) {
   application.start = function(customBackend, withTileMaps, isExperimental) {
     var backend = customBackend || new Backend();
@@ -79,43 +80,53 @@
   };
 
   var createOpenLayersMap = function(startupParameters) {
-    var map = new OpenLayers.Map({
-      controls: [],
-      units: 'm',
-      maxExtent: new OpenLayers.Bounds(-548576, 6291456, 1548576, 8388608),
-      resolutions: [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625],
-      projection: 'EPSG:3067',
-      isBaseLayer: true,
-      center: new OpenLayers.LonLat(startupParameters.lon, startupParameters.lat),
-      fallThrough: true,
-      theme: null,
-      zoomMethod: null
+    mapObject = new ol.Map({
+      // target: 'mapdiv',
+      // controls:  ol.control.defaults({
+      //   attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+      //     collapsible: false
+      //   })
+      // }),
+      // units: 'm',
+      // // maxExtent: new OpenLayers.Bounds(-548576, 6291456, 1548576, 8388608),
+      // resolutions: [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625],
+      // projection: 'EPSG:3067',
+      // isBaseLayer: true,
+      view: new ol.View({
+        center: [startupParameters.lon, startupParameters.lat],
+        zoom: startupParameters.zoom
+      }),
+      // fallThrough: true,
+      // theme: null,
+      layers: [        new ol.layer.Tile({
+        source: new ol.source.OSM()
+      })
+      ]
+      // zoomMethod: null
     });
-    var base = new OpenLayers.Layer("BaseLayer", {
-      layerId: 0,
-      isBaseLayer: true,
-      displayInLayerSwitcher: false
-    });
-    map.addLayer(base);
-    map.render('mapdiv');
-    map.zoomTo(startupParameters.zoom);
-    return map;
+    // var base = new OpenLayers.Layer("BaseLayer", {
+    //   layerId: 0,
+    //   isBaseLayer: true,
+    //   displayInLayerSwitcher: false
+    // });
+    console.log(mapObject);
+    return mapObject;
   };
 
   var setupMap = function(backend, models, withTileMaps, startupParameters) {
     var map = createOpenLayersMap(startupParameters);
 
-    var NavigationControl = OpenLayers.Class(OpenLayers.Control.Navigation, {
-      wheelDown: function(evt, delta) {
-        if (applicationModel.canZoomOut()) {
-          return OpenLayers.Control.Navigation.prototype.wheelDown.apply(this,arguments);
-        } else {
-          new Confirm();
-        }
-      }
-    });
-
-    map.addControl(new NavigationControl());
+    // var NavigationControl = OpenLayers.Class(OpenLayers.Control.Navigation, {
+    //   wheelDown: function(evt, delta) {
+    //     if (applicationModel.canZoomOut()) {
+    //       return OpenLayers.Control.Navigation.prototype.wheelDown.apply(this,arguments);
+    //     } else {
+    //       new Confirm();
+    //     }
+    //   }
+    // });
+    //
+    // map.addControl(new NavigationControl());
 
     var mapOverlay = new MapOverlay($('.container'));
 
