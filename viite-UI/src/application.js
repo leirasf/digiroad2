@@ -1,5 +1,6 @@
 var mapObject;
 (function(application) {
+  DR2_LOGGING=true;
   application.start = function(customBackend, withTileMaps, isExperimental) {
     var backend = customBackend || new Backend();
     var tileMaps = _.isUndefined(withTileMaps) ? true : withTileMaps;
@@ -109,7 +110,6 @@ var mapObject;
     //   isBaseLayer: true,
     //   displayInLayerSwitcher: false
     // });
-    console.log(mapObject);
     return mapObject;
   };
 

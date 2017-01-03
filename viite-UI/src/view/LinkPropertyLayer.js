@@ -118,8 +118,9 @@
     this.refreshView = function() {
       // Generalize the zoom levels as the resolutions and zoom levels differ between map tile sources
       zoom = 11 - Math.round(Math.log(map.getView().getResolution()) * Math.LOG2E);
-      console.log(roadLayer);
-      roadCollection.fetch(map.getView().calculateExtent(map.getSize()), zoom);
+      var layers = map.getLayers().getArray();
+      var extent = [-548576, 6291456, 1548576, 8388608];
+      roadCollection.fetch(extent, zoom);
     };
 
     this.isDirty = function() {

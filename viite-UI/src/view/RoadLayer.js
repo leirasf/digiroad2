@@ -108,6 +108,7 @@ var RoadStyles = function() {
     var drawRoadLinks = function(roadLinks, zoom) {
       uiState.zoomLevel = zoom;
       eventbus.trigger('roadLinks:beforeDraw');
+      console.log(this.layer);
       vectorLayer.clear();
       var features = _.map(roadLinks, function(roadLink) {
         var points = _.map(roadLink.points, function(point) {
@@ -198,7 +199,8 @@ var RoadStyles = function() {
 
     vectorLayer = new ol.layer.Vector({
       title: "road",
-      style: new RoadStyles().roadStyles
+      style: new RoadStyles().roadStyles,
+      source: new ol.source.Vector({})
     });
     vectorLayer.setVisible(false);
     selectControl = new ol.interaction.Select({
