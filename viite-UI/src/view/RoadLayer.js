@@ -1,22 +1,22 @@
 var RoadStyles = function() {
-  var styleMap = new OpenLayers.StyleMap({
-    "select": new OpenLayers.Style({
-      strokeWidth: 6,
-      strokeOpacity: 1,
-      strokeColor: "#5eaedf"
-    }),
-    "default": new OpenLayers.Style({
-      strokeWidth: 5,
-      strokeColor: "#a4a4a2",
-      strokeOpacity: 0.7
-    })
-  });
-
-  this.roadStyles = styleMap;
-  styleMap.styles.default.rules.push(new OpenLayers.Rule({
-    elseFilter: true,
-    symbolizer: styleMap.styles.default.defaultStyle
-  }));
+  // var styleMap = new OpenLayers.StyleMap({
+  //   "select": new OpenLayers.Style({
+  //     strokeWidth: 6,
+  //     strokeOpacity: 1,
+  //     strokeColor: "#5eaedf"
+  //   }),
+  //   "default": new OpenLayers.Style({
+  //     strokeWidth: 5,
+  //     strokeColor: "#a4a4a2",
+  //     strokeOpacity: 0.7
+  //   })
+  // });
+  //
+  // this.roadStyles = styleMap;
+  // styleMap.styles.default.rules.push(new OpenLayers.Rule({
+  //   elseFilter: true,
+  //   symbolizer: styleMap.styles.default.defaultStyle
+  // }));
 };
 
 (function(root) {
@@ -47,22 +47,22 @@ var RoadStyles = function() {
 
     var disableColorsOnRoadLayer = function() {
       if (stylesUndefined()) {
-        vectorLayer.styleMap.styles.default.rules = [];
+        // vectorLayer.styleMap.styles.default.rules = [];
       }
     };
 
     var changeRoadsWidthByZoomLevel = function() {
-      if (stylesUndefined()) {
-        var widthBase = 2 + (map.getZoom() - minimumContentZoomLevel());
-        var roadWidth = widthBase * widthBase;
-        if (applicationModel.isRoadTypeShown()) {
-          vectorLayer.styleMap.styles.default.defaultStyle.strokeWidth = roadWidth;
-          vectorLayer.styleMap.styles.select.defaultStyle.strokeWidth = roadWidth;
-        } else {
-          vectorLayer.styleMap.styles.default.defaultStyle.strokeWidth = 5;
-          vectorLayer.styleMap.styles.select.defaultStyle.strokeWidth = 7;
-        }
-      }
+      // if (stylesUndefined()) {
+      //   var widthBase = 2 + (map.getZoom() - minimumContentZoomLevel());
+      //   var roadWidth = widthBase * widthBase;
+      //   if (applicationModel.isRoadTypeShown()) {
+      //     vectorLayer.styleMap.styles.default.defaultStyle.strokeWidth = roadWidth;
+      //     vectorLayer.styleMap.styles.select.defaultStyle.strokeWidth = roadWidth;
+      //   } else {
+      //     vectorLayer.styleMap.styles.default.defaultStyle.strokeWidth = 5;
+      //     vectorLayer.styleMap.styles.select.defaultStyle.strokeWidth = 7;
+      //   }
+      // }
     };
 
     var usingLayerSpecificStyleProvider = function(action) {
@@ -79,7 +79,7 @@ var RoadStyles = function() {
         disableColorsOnRoadLayer();
       }
       changeRoadsWidthByZoomLevel();
-      usingLayerSpecificStyleProvider(function() { vectorLayer.redraw(); });
+      // usingLayerSpecificStyleProvider(function() { vectorLayer.redraw(); });
     };
 
     var minimumContentZoomLevel = function() {
@@ -108,12 +108,15 @@ var RoadStyles = function() {
     var drawRoadLinks = function(roadLinks, zoom) {
       uiState.zoomLevel = zoom;
       eventbus.trigger('roadLinks:beforeDraw');
-      vectorLayer.removeAllFeatures();
+      vectorLayer.clear();
       var features = _.map(roadLinks, function(roadLink) {
         var points = _.map(roadLink.points, function(point) {
-          return new OpenLayers.Geometry.Point(point.x, point.y);
+          return new ol.geom.Point([point.x, point.y]);
         });
-        return new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(points), roadLink);
+        return new ol.Feature({
+          geometry: new ol.geom.LineString(points),
+          id: roadLink.id
+        });
       });
       usingLayerSpecificStyleProvider(function() {
         vectorLayer.addFeatures(features);
@@ -123,11 +126,14 @@ var RoadStyles = function() {
 
     var drawRoadLink = function(roadLink) {
       var points = _.map(roadLink.points, function(point) {
-        return new OpenLayers.Geometry.Point(point.x, point.y);
+        return new ol.geom.Point([point.x, point.y]);
       });
-      var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(points), roadLink);
+      var feature = new new ol.Feature({
+        geometry: new ol.geom.LineString(points),
+        id: roadLink.id
+      });
       usingLayerSpecificStyleProvider(function() {
-        vectorLayer.addFeatures([feature]);
+        vectorLayer.addFeature(feature);
       });
     };
 
@@ -143,7 +149,7 @@ var RoadStyles = function() {
     };
 
     var createZoomLevelFilter = function(zoomLevel) {
-      return new OpenLayers.Filter.Function({ evaluate: function() { return uiState.zoomLevel === zoomLevel; } });
+      return new ol.format.filter.EqualTo('zoomLevel', uiState.zoomLevel);
     };
 
     var activateLayerStyleMap = function(layer) {
@@ -165,7 +171,7 @@ var RoadStyles = function() {
     };
 
     var clear = function() {
-      vectorLayer.removeAllFeatures();
+      vectorLayer.clear();
     };
 
     var selectRoadLink = function(roadLink) {
@@ -173,12 +179,12 @@ var RoadStyles = function() {
         if (roadLink.linkId) return feature.attributes.linkId === roadLink.linkId;
         else return feature.attributes.roadLinkId === roadLink.roadLinkId;
       });
-      selectControl.unselectAll();
-      selectControl.select(feature);
+      selectControl.getFeatures().clear();
+      selectControl.setFeatures([feature]);
     };
 
     eventbus.on('asset:saved asset:updateCancelled asset:updateFailed', function() {
-      selectControl.unselectAll();
+      // selectControl.unselectAll();
     }, this);
 
     eventbus.on('road-type:selected', toggleRoadType, this);
@@ -190,12 +196,14 @@ var RoadStyles = function() {
       toggleRoadType();
     }, this);
 
-    vectorLayer = new OpenLayers.Layer.Vector("road", {
-      styleMap: new RoadStyles().roadStyles,
-      rendererOptions: {zIndexing: true}
+    vectorLayer = new ol.layer.Vector({
+      title: "road",
+      style: new RoadStyles().roadStyles
     });
-    vectorLayer.setVisibility(false);
-    selectControl = new OpenLayers.Control.SelectFeature(vectorLayer);
+    vectorLayer.setVisible(false);
+    selectControl = new ol.interaction.Select({
+      layers: [vectorLayer]
+    });
     map.addLayer(vectorLayer);
     toggleRoadType();
 
