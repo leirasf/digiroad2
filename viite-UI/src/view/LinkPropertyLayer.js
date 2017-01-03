@@ -8,15 +8,15 @@
     var eventListener = _.extend({running: false}, eventbus);
     var zoom = 0;
     var currentRenderIntent = 'default';
-    var linkPropertyLayerStyles = LinkPropertyLayerStyles(roadLayer);
+    // var linkPropertyLayerStyles = LinkPropertyLayerStyles(roadLayer);
     this.minZoomForContent = zoomlevels.minZoomForRoadLinks;
-    var floatingMarkerLayer = new OpenLayers.Layer.Boxes(layerName);
-    map.addLayer(floatingMarkerLayer);
-    floatingMarkerLayer.setVisibility(true);
+    // var floatingMarkerLayer = new OpenLayers.Layer.Boxes(layerName);
+    // map.addLayer(floatingMarkerLayer);
+    // floatingMarkerLayer.setVisibility(true);
 
-    roadLayer.setLayerSpecificStyleMapProvider(layerName, function() {
-      return linkPropertyLayerStyles.getDatasetSpecificStyleMap(linkPropertiesModel.getDataset(), currentRenderIntent);
-    });
+    // roadLayer.setLayerSpecificStyleMapProvider(layerName, function() {
+    //   return linkPropertyLayerStyles.getDatasetSpecificStyleMap(linkPropertiesModel.getDataset(), currentRenderIntent);
+    // });
 
     var selectRoadLink = function(feature) {
       if(typeof feature.attributes.linkId !== 'undefined') {
@@ -35,20 +35,19 @@
       unhighlightFeatures();
     };
 
-    var selectControl = new OpenLayers.Control.SelectFeature(roadLayer.layer, {
-      onSelect: selectRoadLink,
-      onUnselect: unselectRoadLink
+    var selectControl = new ol.interaction.Select({
+      layers: roadLayer.layer
     });
 
-    map.addControl(selectControl);
-    var doubleClickSelectControl = new DoubleClickSelectControl(selectControl, map);
+    map.addInteraction(selectControl);
+    // var doubleClickSelectControl = new DoubleClickSelectControl(selectControl, map);
     this.selectControl = selectControl;
 
     this.activateSelection = function() {
-      doubleClickSelectControl.activate();
+      // doubleClickSelectControl.activate();
     };
     this.deactivateSelection = function() {
-      doubleClickSelectControl.deactivate();
+      // doubleClickSelectControl.deactivate();
     };
 
     var highlightFeatures = function() {
@@ -75,27 +74,27 @@
 
       roadLayer.drawRoadLinks(roadLinks, zoom);
       drawDashedLineFeaturesIfApplicable(roadLinks);
-      me.drawSigns(roadLayer.layer, roadLinks);
+      // me.drawSigns(roadLayer.layer, roadLinks);
 
-      floatingMarkerLayer.clearMarkers();
+      // floatingMarkerLayer.clear();
 
-      if(zoom > zoomlevels.minZoomForAssets) {
-        var floatingRoadMarkers = _.filter(roadLinks, function(roadlink) {
-          return roadlink.roadLinkType === -1;
-        });
-        _.each(floatingRoadMarkers, function(floatlink) {
-          var mouseClickHandler = createMouseClickHandler(floatlink);
-          var marker = cachedLinkPropertyMarker.createMarker(floatlink);
-          marker.events.register('click',marker, mouseClickHandler);
-          marker.events.registerPriority('dblclick',marker, mouseClickHandler);
-          floatingMarkerLayer.addMarker(marker);
-        });
-      }
-
-      me.drawRoadNumberMarkers(roadLayer.layer, roadLinks);
-      if (zoom > zoomlevels.minZoomForAssets) {
-        me.drawCalibrationMarkers(roadLayer.layer, roadLinks);
-      }
+      // if(zoom > zoomlevels.minZoomForAssets) {
+      //   var floatingRoadMarkers = _.filter(roadLinks, function(roadlink) {
+      //     return roadlink.roadLinkType === -1;
+      //   });
+      //   _.each(floatingRoadMarkers, function(floatlink) {
+      //     var mouseClickHandler = createMouseClickHandler(floatlink);
+      //     var marker = cachedLinkPropertyMarker.createMarker(floatlink);
+      //     marker.events.register('click',marker, mouseClickHandler);
+      //     marker.events.registerPriority('dblclick',marker, mouseClickHandler);
+      //     floatingMarkerLayer.addMarker(marker);
+      //   });
+      // }
+      //
+      // me.drawRoadNumberMarkers(roadLayer.layer, roadLinks);
+      // if (zoom > zoomlevels.minZoomForAssets) {
+      //   me.drawCalibrationMarkers(roadLayer.layer, roadLinks);
+      // }
       redrawSelected();
       eventbus.trigger('linkProperties:available');
     };
@@ -118,8 +117,9 @@
 
     this.refreshView = function() {
       // Generalize the zoom levels as the resolutions and zoom levels differ between map tile sources
-      zoom = 11 - Math.round(Math.log(map.getResolution()) * Math.LOG2E);
-      roadCollection.fetch(map.getExtent(), zoom);
+      zoom = 11 - Math.round(Math.log(map.getView().getResolution()) * Math.LOG2E);
+      console.log(roadLayer);
+      roadCollection.fetch(map.getView().calculateExtent(map.getSize()), zoom);
     };
 
     this.isDirty = function() {
@@ -152,22 +152,22 @@
       15: { strokeWidth: 14, pointRadius: 22 }
     };
 
-    var browseStyle = new OpenLayers.Style(OpenLayers.Util.applyDefaults());
-    var browseStyleMap = new OpenLayers.StyleMap({ default: browseStyle });
-    browseStyleMap.addUniqueValueRules('default', 'level', unknownFeatureSizeLookup, applicationModel.zoom);
+    // var browseStyle = new OpenLayers.Style(OpenLayers.Util.applyDefaults());
+    // var browseStyleMap = new OpenLayers.StyleMap({ default: browseStyle });
+    // browseStyleMap.addUniqueValueRules('default', 'level', unknownFeatureSizeLookup, applicationModel.zoom);
 
-    var typeFilter = function(type) {
-      return new OpenLayers.Filter.Comparison({ type: OpenLayers.Filter.Comparison.EQUAL_TO, property: 'type', value: type });
-    };
+    // var typeFilter = function(type) {
+    //   return new OpenLayers.Filter.Comparison({ type: OpenLayers.Filter.Comparison.EQUAL_TO, property: 'type', value: type });
+    // };
 
-    var unknownLimitStyleRule = new OpenLayers.Rule({
-      filter: typeFilter('roadAddressAnomaly'),
-      symbolizer: { externalGraphic: 'images/speed-limits/unknown.svg' }
-    });
-    browseStyle.addRules([unknownLimitStyleRule]);
-    var vectorLayer = new OpenLayers.Layer.Vector(layerName, { styleMap: browseStyleMap });
-    vectorLayer.setOpacity(1);
-    vectorLayer.setVisibility(true);
+    // var unknownLimitStyleRule = new OpenLayers.Rule({
+    //   filter: typeFilter('roadAddressAnomaly'),
+    //   symbolizer: { externalGraphic: 'images/speed-limits/unknown.svg' }
+    // });
+    // browseStyle.addRules([unknownLimitStyleRule]);
+    // var vectorLayer = new OpenLayers.Layer.Vector(layerName, { styleMap: browseStyleMap });
+    // vectorLayer.setOpacity(1);
+    // vectorLayer.setVisibility(true);
 
     var drawDashedLineFeatures = function(roadLinks) {
       var dashedRoadClasses = [7, 8, 9, 10];
@@ -349,7 +349,7 @@
     };
 
     var show = function(map) {
-      vectorLayer.setVisibility(true);
+      // vectorLayer.setVisible(true);
       me.show(map);
       eventListener.listenTo(eventbus, 'map:clicked', cancelSelection);
     };

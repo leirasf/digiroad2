@@ -161,7 +161,7 @@ var mapObject;
 
     new MapView(map, layers, new InstructionsPopup($('.digiroad2')));
 
-    applicationModel.moveMap(map.getZoom(), map.getExtent());
+    // applicationModel.moveMap(map.getView().getZoom(), map.getView().getExtent());
 
     return map;
   };

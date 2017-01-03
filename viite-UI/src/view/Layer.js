@@ -99,7 +99,7 @@
     this.mapOverLinkMiddlePoints = mapOverLinkMiddlePoints;
     this.show = function(map) {
       eventbus.on('map:moved', me.handleMapMoved);
-      if (map.getZoom() >= me.minZoomForContent) {
+      if (map.getView().getZoom() >= me.minZoomForContent) {
         me.start('shown');
       }
     };
