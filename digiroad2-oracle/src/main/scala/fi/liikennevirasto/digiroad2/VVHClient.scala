@@ -736,9 +736,8 @@ class VVHComplementaryClient(vvhRestApiEndPoint: String) extends VVHClient(vvhRe
     *
     */
   def fetchWalkwaysByBoundsAndMunicipalitiesF(bounds: BoundingRectangle, municipalities: Set[Int]): Future[Seq[VVHRoadlink]] = {
-    Future(queryByBoundsAndMunicipalities(bounds, municipalities).filter(vvhrl =>
-      vvhrl.attributes("MTKCLASS") != null &&
-      vvhrl.attributes("MTKCLASS").equals(12314)))
+    //TODO: Filter in VVH query by MTKCLASS
+    Future(queryByBoundsAndMunicipalities(bounds, municipalities).filter(rl => rl.attributes.contains("MTKCLASS") && 12314.equals(rl.attributes("MTKCLASS"))))
   }
 
 
