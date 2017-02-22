@@ -5,7 +5,7 @@
     var mapOverLinkMiddlePoints = function(links, transformation) {
       return _.map(links, function(link) {
         var points = _.map(link.points, function(point) {
-          return new OpenLayers.Geometry.Point(point.x, point.y);
+          return new ol.geom.Point(point.x, point.y);
         });
         var lineString = new OpenLayers.Geometry.LineString(points);
         var middlePoint = GeometryUtils.calculateMidpointOfLineString(lineString);
@@ -59,7 +59,7 @@
     this.drawSigns = function(layer, roadLinks) {
       var signs = mapOverLinkMiddlePoints(roadLinks, function(link, middlePoint) {
         var attributes = _.merge({}, link, { rotation: 0 });
-        return new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(middlePoint.x, middlePoint.y), attributes);
+        return new OpenLayers.Feature.Vector(new ol.geom.Point(middlePoint.x, middlePoint.y), attributes);
       });
 
       layer.addFeatures(signs);
@@ -76,7 +76,7 @@
       //   return {x: x, y: y, text: links[0].roadNumber + ' / ' + links[0].roadPartNumber };
       // });
       // var markers = _.map(midpoint, function (rno, middlePoint) {
-      //   return new OpenLayers.Feature.Vector(OpenLayers.Geometry.Point(middlePoint.x, middlePoint.y), {label: middlePoint.text});
+      //   return new OpenLayers.Feature.Vector(ol.geom.Point(middlePoint.x, middlePoint.y), {label: middlePoint.text});
       // });
       // layer.addFeatures(markers);
     };
