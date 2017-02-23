@@ -72,21 +72,20 @@
     var open = function(linkId, id, singleLinkSelect, visibleFeatures) {
       var canIOpen = !_.isUndefined(linkId) ? !isSelectedByLinkId(linkId) || isDifferingSelection(singleLinkSelect) : !isSelectedById(id) || isDifferingSelection(singleLinkSelect);
       if (canIOpen) {
-        /*if (canIOpen) {
-         if(featuresToKeep.length === 0){
-         close();
-         } else {
-         if (!_.isEmpty(current) && !isDirty()) {
-         _.forEach(current, function(selected) { selected.unselect(); });
-         }
-         }*/
-        close();
+        if(featuresToKeep.length === 0){
+          close();
+        } else {
+          if (!_.isEmpty(current) && !isDirty()) {
+            _.forEach(current, function (selected) {
+              selected.unselect();
+            });
+          }
+        }
         if(!_.isUndefined(linkId)){
-          current = singleLinkSelect ? roadCollection.getByLinkId([linkId]) : roadCollection.getGroupByLinkId(linkId);  
+          current = singleLinkSelect ? roadCollection.getByLinkId([linkId]) : roadCollection.getGroupByLinkId(linkId);
         } else {
           current = singleLinkSelect ? roadCollection.getById([id]) : roadCollection.getGroupById(id);
         }
-        
         _.forEach(current, function (selected) {
           selected.select();
         });
@@ -106,20 +105,19 @@
         }
         eventbus.trigger('linkProperties:selected', data4Display);
 
-        if(!singleLinkSelect){
-         var selectedOL3Features = _.filter(visibleFeatures, function(vf){
-            return (_.some(get(), function(s){
+        if(!singleLinkSelect || data4Display.roadLinkType === -1 || featuresToKeep.length > 1){
+          var fused = get().concat(featuresToKeep);
+          var selectedOL3Features = _.filter(visibleFeatures, function(vf){
+            return (_.some(fused, function(s){
                 return s.linkId === vf.roadLinkData.linkId;
-              })) && (_.some(get(), function(s){
+              })) && (_.some(fused, function(s){
                 return s.mmlId === vf.roadLinkData.mmlId;
               }));
           });
           eventbus.trigger('linkProperties:ol3Selected', selectedOL3Features);
         }
-
-        eventbus.trigger('linkProperties:selected', extractDataForDisplay(get()));
       }
-    };
+      };
 
     var getLinkAdjacents = function(link) {
       var linkIds = {};

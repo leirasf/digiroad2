@@ -235,8 +235,10 @@
             floatingMarkerLayer.setOpacity(0.2);
             anomalousMarkerLayer.setOpacity(0.2);
           }
-          selectedLinkProperty.close();
-          if(isAnomalousById(selection.id) || isFloatingById(selection.id)){
+          if(selectedLinkProperty.getFeaturesToKeep().length === 0) {
+            selectedLinkProperty.close();
+          }
+          if(isAnomalousById(selection.id) || isFloatingById(selection.id) || selectedLinkProperty.getFeaturesToKeep().length > 0){
             selectedLinkProperty.open(selection.roadLinkData.linkId, selection.roadLinkData.id, true, visibleFeatures);
           } else {
             selectedLinkProperty.open(selection.roadLinkData.linkId, selection.roadLinkData.id, false, visibleFeatures);

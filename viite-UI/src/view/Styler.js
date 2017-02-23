@@ -220,8 +220,7 @@
     };
 
     return {
-      generateStyleByFeature: generateStyleByFeature,
-      changeRoadColor: changeRoadColor
+      generateStyleByFeature: generateStyleByFeature
     };
   };
 })(this);
