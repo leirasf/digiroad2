@@ -657,18 +657,13 @@
     };
 
     var createIndicatorFromBounds = function(middlePoint, marker) {
-      //var markerTemplate = _.template('<span class="marker" style="margin-left: -1em; margin-top: -1em; position: absolute;"><%= marker %></span>');
-      //var box = new OpenLayers.Marker.Box(bounds, "00000000");
-      //$(box.div).html(markerTemplate({'marker': marker}));
-      //$(box.div).css('overflow', 'visible');
-      //return box;
+        var markerIndicator = new ol.Feature({
+          geometry: new ol.geom.Point([middlePoint.x, middlePoint.y])
+        });
 
-
-      var IndicatorContainer = function(middlePoint, marker) {
         var style = new ol.style.Style({
           image : new ol.style.Icon({
-            src: 'images/center-marker.png'
-            //src: 'images/center-marker2.svg'
+            src: 'images/center-marker2.svg'
           }),
           text : new ol.style.Text({
             text : marker,
@@ -677,12 +672,8 @@
             })
           })
         });
-        var markerIndicator = new ol.Feature({
-          geometry: new ol.geom.Point([middlePoint.x, middlePoint.y])
-        });
         markerIndicator.setStyle(style);
-        };
-      return marker;
+      return markerIndicator;
     };
 
     var redrawNextSelectedTarget= function(targets, adjacents) {
