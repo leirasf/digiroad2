@@ -5,9 +5,10 @@
     var mapOverLinkMiddlePoints = function(links, transformation) {
       return _.map(links, function(link) {
         var points = _.map(link.points, function(point) {
-          return new ol.geom.Point(point.x, point.y);
+          return [point.x, point.y];
+          //var coordPoints = _.map(points, function(point) { return [point.x, point.y]; });//
+          //return new ol.geom.LineString(coordPoints);
         });
-        var lineString = new OpenLayers.Geometry.LineString(points);
         var middlePoint = GeometryUtils.calculateMidpointOfLineString(lineString);
         return transformation(link, middlePoint);
       });
@@ -94,8 +95,8 @@
     this.mapOverLinkMiddlePoints = mapOverLinkMiddlePoints;
     this.show = function(map) {
       eventbus.on('map:moved', me.handleMapMoved);
-      if (map.getZoom() >= me.minZoomForContent) {
-        me.start('shown');
+        if (map.getZoom() >= me.minZoomForContent) {
+          me.start('shown');
       }
     };
     this.hide = function() {

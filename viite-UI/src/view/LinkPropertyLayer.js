@@ -644,29 +644,31 @@
     var drawIndicators= function(links){
        indicatorLayer.getSource().clear();
        var indicators = me.mapOverLinkMiddlePoints(links, function(link, middlePoint) {
-         var bounds = ol.extent.boundingExtent([middlePoint.x, middlePoint.y, middlePoint.x, middlePoint.y]);
+         //var bounds = ol.extent.boundingExtent([middlePoint.x, middlePoint.y, middlePoint.x, middlePoint.y]);
          //return createIndicatorFromBounds(bounds, link.marker);
-         return createIndicatorFromBounds(middlePoint.x, middlePoint.y, link.marker);
+         var IndicatorMarker = createIndicatorFromBounds(middlePoint, link.marker);
+         return indicatorLayer.getSource().addFeature(IndicatorMarker);
        });
-       _.forEach(indicators, function(indicator){
-         indicatorLayer.getSource().addFeature(indicator);
-       });
+
+       /*_.forEach(links, function(link){
+         var marker = cachedLinkPropertyMarker.createMarker(link);
+         indicatorLayer.getSource().addFeature(marker);
+       });*/
     };
 
-    var createIndicatorFromBounds = function(xPoint, yPoint, marker) {
+    var createIndicatorFromBounds = function(middlePoint, marker) {
       //var markerTemplate = _.template('<span class="marker" style="margin-left: -1em; margin-top: -1em; position: absolute;"><%= marker %></span>');
       //var box = new OpenLayers.Marker.Box(bounds, "00000000");
       //$(box.div).html(markerTemplate({'marker': marker}));
       //$(box.div).css('overflow', 'visible');
       //return box;
-      var markerIndicator = new ol.Feature({
-        geometry : new ol.geom.Point([xPoint, yPoint])
-      });
 
-      var IndicatorContainer = function(xPoint, yPoint, marker) {
+
+      var IndicatorContainer = function(middlePoint, marker) {
         var style = new ol.style.Style({
           image : new ol.style.Icon({
-            src: 'images/center-marker.svg'
+            src: 'images/center-marker.png'
+            //src: 'images/center-marker2.svg'
           }),
           text : new ol.style.Text({
             text : marker,
@@ -674,6 +676,9 @@
               color: "#ffffff"
             })
           })
+        });
+        var markerIndicator = new ol.Feature({
+          geometry: new ol.geom.Point([middlePoint.x, middlePoint.y])
         });
         markerIndicator.setStyle(style);
         };
