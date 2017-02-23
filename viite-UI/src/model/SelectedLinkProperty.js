@@ -91,22 +91,21 @@
           selected.select();
         });
 
-        /*
-         var data4Display = extractDataForDisplay(get());
-         if(!applicationModel.isReadOnly() && get()[0].roadLinkType === -1){
-         if (featuresToKeep.length !== 0) {
-         applicationModel.addSpinner();
-         }
-         featuresToKeep.push(data4Display);
-         }
-         var contains = _.find(featuresToKeep, function(fk){
-         return fk.linkId === data4Display.linkId;
-         });
-         if(featuresToKeep.length !== 0 && _.isUndefined(contains)){
-         featuresToKeep.push(data4Display);
-         }
-         eventbus.trigger('linkProperties:selected', data4Display);
-         */
+        var data4Display = extractDataForDisplay(get());
+        if(!applicationModel.isReadOnly() && get()[0].roadLinkType === -1){
+          if (featuresToKeep.length !== 0) {
+            applicationModel.addSpinner();
+          }
+          featuresToKeep.push(data4Display);
+        }
+        var contains = _.find(featuresToKeep, function(fk){
+          return fk.linkId === data4Display.linkId;
+        });
+        if(featuresToKeep.length !== 0 && _.isUndefined(contains)){
+          featuresToKeep.push(data4Display);
+        }
+        eventbus.trigger('linkProperties:selected', data4Display);
+
         if(!singleLinkSelect){
          var selectedOL3Features = _.filter(visibleFeatures, function(vf){
             return (_.some(get(), function(s){

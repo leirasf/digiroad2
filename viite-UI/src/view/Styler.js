@@ -32,6 +32,7 @@
             case 9 : return 'rgba(255, 85, 221, 0.65)';
             case 10 : return 'rgba(255, 85, 221, 0.65)';
             case 11 : return 'rgba(68, 68, 68, 0.65)';
+            case 12 : return 'rgba(0, 255, 0, 0.65)';
             case 98 : return 'rgba(250, 250, 250, 1)';
             case 99 : return 'rgba(164, 164, 162, 0.65)';
           }
@@ -219,7 +220,8 @@
     };
 
     return {
-      generateStyleByFeature: generateStyleByFeature
+      generateStyleByFeature: generateStyleByFeature,
+      changeRoadColor: changeRoadColor
     };
   };
 })(this);
