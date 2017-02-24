@@ -57,7 +57,9 @@
     });
 
     eventbus.on('linkProperties:selected', function (linkProperty) {
+      if(!_.isEmpty(models.selectedLinkProperty.get())){
       router.navigate('linkProperty/' + linkProperty.linkId);
+      }
     });
 
     eventbus.on('layer:selected', function (layer) {
